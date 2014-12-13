@@ -7,14 +7,11 @@ import java.io.OutputStream;
 
 public class InMemoryObjectPersistence implements ObjectPersistence {
 
-    private final ByteArrayOutputStream outputStream;
-
-    public InMemoryObjectPersistence() {
-        outputStream = new ByteArrayOutputStream();
-    }
+    private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @Override
     public OutputStream getOutputStream() {
+        outputStream = new ByteArrayOutputStream();
         return outputStream;
     }
 

@@ -10,6 +10,10 @@ public class BeanDBException extends RuntimeException {
         super(message, cause);
     }
 
+    public BeanDBException(Throwable cause) {
+        super(cause);
+    }
+
     public static BeanDBException create(Throwable cause, String toFormatException, Object ... args) {
         return new BeanDBException(String.format(toFormatException, args), cause);
     }

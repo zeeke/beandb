@@ -1,9 +1,11 @@
 package org.laborra.beandb.internal;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.laborra.beandb.BeanDBConnector;
+import org.laborra.beandb.ObjectNotFoundException;
 import org.laborra.beandb.persistence.ObjectPersistence;
 
 import java.io.Serializable;
@@ -45,6 +47,8 @@ public class KryoDBConnector implements BeanDBConnector {
 
         try (Input input = new Input(objectPersistence.getInputStream())) {
             return kryo.readObject(input, clazz);
+        } catch (KryoException e) {
+            throw new ObjectNotFoundException(e);
         }
     }
 }
