@@ -19,29 +19,30 @@ public class MainTest {
     }
 
     @Test
-    public void basic_save_and_load() {
+    public void create_and_read() {
         final SingleStrBean singleStrBean = createBean(1);
 
-        beanDBConnector.save(singleStrBean);
+        final long id = beanDBConnector.create(singleStrBean);
 
         assertThat(
-                beanDBConnector.load(1, SingleStrBean.class),
+                (SingleStrBean) beanDBConnector.read(id),
                 samePropertyValuesAs(singleStrBean)
         );
     }
 
     @Test
-    public void single_bean_override() {
+    public void single_bean_update() {
 
-        beanDBConnector.save(createBean(1));
+        final long id = beanDBConnector.create(createBean(1));
 
         final SingleStrBean bean = createBean(1);
         bean.setData("Fresh data");
 
-        beanDBConnector.save(bean);
+        beanDBConnector.update(id, bean);
 
+        final SingleStrBean actual = beanDBConnector.read(id);
         assertThat(
-                beanDBConnector.load(1, SingleStrBean.class).getData(),
+                actual.getData(),
                 Matchers.equalTo("Fresh data")
         );
     }
@@ -49,46 +50,36 @@ public class MainTest {
     @Test
     public void multiple_bean_override() {
 
-        beanDBConnector.save(createBean(1));
-        beanDBConnector.save(createBean(2));
-        beanDBConnector.save(createBean(3));
+        beanDBConnector.create(createBean(1));
+        final long id2 = beanDBConnector.create(createBean(2));
+        beanDBConnector.create(createBean(3));
 
-        final SingleStrBean second = beanDBConnector.load(2, SingleStrBean.class);
+        final SingleStrBean second = beanDBConnector.read(id2);
         second.setData("Fresh data");
 
-        beanDBConnector.save(second);
+        beanDBConnector.update(id2, second);
 
+        final SingleStrBean actual = beanDBConnector.read(id2);
         assertThat(
-                beanDBConnector.load(2, SingleStrBean.class).getData(),
+                actual.getData(),
                 Matchers.equalTo("Fresh data")
         );
     }
 
     @Test(expected = ObjectNotFoundException.class)
     public void object_not_found() {
-        beanDBConnector.load(1, SingleStrBean.class);
+        beanDBConnector.read(1);
     }
 
 
     private SingleStrBean createBean(Integer id) {
         final SingleStrBean singleStrBean = new SingleStrBean();
         singleStrBean.setData(String.format("test data for [%d]", id));
-        singleStrBean.setId(id);
         return singleStrBean;
     }
 
-
     public static class SingleStrBean {
-        private Integer id;
         private String data;
-
-        public Integer getId() {
-            return id;
-        }
-
-        public void setId(Integer id) {
-            this.id = id;
-        }
 
         public String getData() {
             return data;

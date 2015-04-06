@@ -1,10 +1,12 @@
 package org.laborra.beandb;
 
-import java.io.Serializable;
-
 public interface BeanDBConnector {
 
-    void save(Object object);
+    long create(Object object);
 
-    <T> T load(Serializable id, Class<T> clazz);
+    <T> T read(long id);
+
+    void update(long id, Object object);
+
+    void delete(long id);
 }

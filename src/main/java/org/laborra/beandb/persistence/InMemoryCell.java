@@ -5,18 +5,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class InMemoryObjectPersistence implements ObjectPersistence {
-
-    private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+public class InMemoryCell implements Cell {
+    private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
     @Override
     public OutputStream getOutputStream() {
-        outputStream = new ByteArrayOutputStream();
-        return outputStream;
+        byteArrayOutputStream.reset();
+        return byteArrayOutputStream;
     }
 
     @Override
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(outputStream.toByteArray());
+        return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
     }
 }

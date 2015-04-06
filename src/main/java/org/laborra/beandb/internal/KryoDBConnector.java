@@ -6,49 +6,68 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.laborra.beandb.BeanDBConnector;
 import org.laborra.beandb.ObjectNotFoundException;
-import org.laborra.beandb.persistence.ObjectPersistence;
-
-import java.io.Serializable;
+import org.laborra.beandb.persistence.Cell;
+import org.laborra.beandb.persistence.Persistence;
 
 public class KryoDBConnector implements BeanDBConnector {
 
     private final Kryo kryo;
-    private final IdentifierResolver identifierResolver;
-    private final PersistenceProvider persistenceProvider;
+    private final Persistence persistence;
 
-    private KryoDBConnector(Kryo kryo, IdentifierResolver identifierResolver, PersistenceProvider persistenceProvider) {
+    private KryoDBConnector(Kryo kryo, Persistence persistence) {
         this.kryo = kryo;
-        this.identifierResolver = identifierResolver;
-        this.persistenceProvider = persistenceProvider;
+        this.persistence = persistence;
     }
 
-    public static KryoDBConnector create() {
+    public static KryoDBConnector create(Persistence persistence) {
         return new KryoDBConnector(
                 new Kryo(),
-                new IdentifierResolver.DefaultIdentifierResolver(),
-                new PersistenceProvider.DefaultPersistenceProvider()
+                persistence
         );
     }
 
     @Override
-    public void save(Object object) {
+    public long create(Object object) {
 
-        final Serializable objectId = identifierResolver.getIdFor(object);
-        final ObjectPersistence objectPersistence = persistenceProvider.getPersistenceFor(objectId, object.getClass());
+        final long coordinate = persistence.create();
+        final Cell cell = persistence.get(coordinate);
+        try (Output output = new Output(cell.getOutputStream())) {
+            kryo.writeClassAndObject(output, object);
+        }
+        return coordinate;
+    }
 
-        try (Output output = new Output(objectPersistence.getOutputStream())) {
-            kryo.writeObject(output, object);
+    @Override
+    public <T> T read(long id) {
+
+        final Cell cell = persistence.get(id);
+        if (cell == null) {
+            throw new ObjectNotFoundException("Cannot find object with identifier " + id);
+        }
+
+        try (Input input = new Input(cell.getInputStream())) {
+            @SuppressWarnings("unchecked")
+            final T ret = (T) kryo.readClassAndObject(input);
+            return ret;
+        } catch (KryoException e) {
+            throw new ObjectNotFoundException(e);
         }
     }
 
     @Override
-    public <T> T load(Serializable id, Class<T> clazz) {
-        final ObjectPersistence objectPersistence = persistenceProvider.getPersistenceFor(id, clazz);
-
-        try (Input input = new Input(objectPersistence.getInputStream())) {
-            return kryo.readObject(input, clazz);
-        } catch (KryoException e) {
-            throw new ObjectNotFoundException(e);
+    public void update(long id, Object object) {
+        final Cell cell = persistence.get(id);
+        if (cell == null) {
+            throw new ObjectNotFoundException("Cannot update object with identifier " + id);
         }
+
+        try (Output output = new Output(cell.getOutputStream())) {
+            kryo.writeClassAndObject(output, object);
+        }
+    }
+
+    @Override
+    public void delete(long id) {
+        persistence.delete(id);
     }
 }

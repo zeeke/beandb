@@ -2,22 +2,18 @@ package org.laborra.beandb.internal;
 
 import org.laborra.beandb.BeanDBConnector;
 import org.laborra.beandb.Configuration;
-import org.laborra.beandb.persistence.ObjectPersistence;
+import org.laborra.beandb.query.SelectAware;
 
 public class BeanDB {
 
-    private final ObjectPersistence objectPersistence;
     private final Configuration configuration;
     private final BeanDBConnector connector;
+    private final SelectAware selectAware;
 
-    public BeanDB(ObjectPersistence objectPersistence, Configuration configuration, BeanDBConnector connector) {
-        this.objectPersistence = objectPersistence;
+    public BeanDB(Configuration configuration, BeanDBConnector connector, SelectAware selectAware) {
         this.configuration = configuration;
         this.connector = connector;
-    }
-
-    public ObjectPersistence getObjectPersistence() {
-        return objectPersistence;
+        this.selectAware = selectAware;
     }
 
     public Configuration getConfiguration() {
@@ -28,4 +24,7 @@ public class BeanDB {
         return connector;
     }
 
+    public SelectAware getSelectAware() {
+        return selectAware;
+    }
 }
