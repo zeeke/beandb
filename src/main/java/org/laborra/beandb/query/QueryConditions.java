@@ -77,18 +77,4 @@ public class QueryConditions {
         }
     }
 
-    private static class PredicateQueryCondition<T> implements QueryCondition {
-
-        private final Predicate<T> predicate;
-
-        private PredicateQueryCondition(Predicate<T> predicate) {
-            this.predicate = predicate;
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public <V> Predicate<V> getPredicate() {
-            return (Predicate<V>) predicate;
-        }
-    }
 }
