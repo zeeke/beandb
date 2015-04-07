@@ -64,7 +64,7 @@ public class QueryConditions {
         });
     }
 
-    private static <F> Object getPropertyValue(F input, String fieldName) {
+    static <F> Object getPropertyValue(F input, String fieldName) {
         final PropertyDescriptor propertyDescriptors;
         try {
             propertyDescriptors = PropertyUtils.getPropertyDescriptor(input, fieldName);
